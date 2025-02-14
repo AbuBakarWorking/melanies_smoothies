@@ -8,8 +8,7 @@ st.title("My Parents New Healthy Diner")
 st.subheader("Breakfast Menu")
 
 name_on_order = st.text_input("Name on Smoothie")
-st.write("The name on your smoothie will be",name_on_order)
-
+st.write("The name on your smoothie will be", name_on_order)
 
 # Get the current credentials
 cnx = st.connection("snowflake")
@@ -22,32 +21,30 @@ pd_df = my_dataframe.to_pandas()
 # st.dataframe(pd_df)
 # st.stop()
 
-
 ingredients_list = st.multiselect(
-    'Choose up to 5 ingredients'
-    , my_dataframe
-    , max_selections=5   
+    'Choose up to 5 ingredients',
+    my_dataframe,
+    max_selections=5   
 )
 # st.text(smoothiefroot_response.json())
-
 
 if ingredients_list:
     # st.write(ingredients_list)
     # st.text(ingredients_list)
 
     ingredients_string = ''
-    for fruit_chosen in ingredients_list:
-        ingredients_string += fruit_choosen + ' '
+    for fruit_chosen in ingredients_list:  # Corrected variable name
+        ingredients_string += fruit_chosen + ' '
 
-        search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]  # Use fruit_chosen here
+        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
 
-        st.subheader(fruit_choosen + 'Nutrition Information')
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_choosen)
+        st.subheader(fruit_chosen + ' Nutrition Information')
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
         sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
     
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
-        values ('""" + ingredients_string + """','"""  +name_on_order+ """')"""
+        values ('""" + ingredients_string + """','"""  + name_on_order + """')"""
     
     # st.write(my_insert_stmt)
     # st.stop()
@@ -56,4 +53,3 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
-
